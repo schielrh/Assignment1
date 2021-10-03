@@ -107,21 +107,20 @@ class Insertion : public Sort {
 
 class Merge : public Sort {
   public:
-    void algorithm(int arr[], int left, int middle, int right) {
-      int i, j, k, subLeft, subRight;
-      //get the size of both sub-arrays
-      subLeft = middle - left + 1; 
-      subRight = right-middle;
-      int leftArr[subLeft], rightArr[subRight];
+    void merge(int arr[], int left, int middle, int right) {
+      int i, j, k, nl, nr;
+      //size of left and right sub-arrays
+      nl = middle-left+1; 
+      nr = right-middle;
+      int leftArr[nl], rightArr[nr];
       //fill left and right sub-arrays
-      for(i = 0; i < subLeft; i++)
+      for(i = 0; i<nl; i++)
         leftArr[i] = arr[left+i];
-      for(j = 0; j < subRight; j++)
+      for(j = 0; j<nr; j++)
         rightArr[j] = arr[middle+1+j];
-      
       i = 0; j = 0; k = left;
-      //combine both sub arrays
-      while(i < subLeft && j < subRight) {
+      //marge temp arrays to real array
+      while(i < nl && j<nr) {
         if(leftArr[i] <= rightArr[j]) {
           arr[k] = leftArr[i];
           i++;
@@ -132,24 +131,24 @@ class Merge : public Sort {
         }
         k++;
       }
-      while(i < subLeft) {      
+      while(i<nl) {       //extra element in left array
         arr[k] = leftArr[i];
         i++; k++;
       }
-      while(j < subLeft) {     
+      while(j<nr) {     //extra element in right array
         arr[k] = rightArr[j];
         j++; k++;
       }
     }
 
     void mergeSort(int arr[], int left, int right) {
-      int middle;
+      int m;
       if(left < right) {
-        middle = left + (right - left) / 2;
-        
-        mergeSort(arr, left, middle);
-        mergeSort(arr, middle + 1, right);
-        algorithm(arr, left, middle, right);
+        int m = left+(right-left)/2;
+        // Sort first and second arrays
+        mergeSort(arr, left, m);
+        mergeSort(arr, m+1, right);
+        merge(arr, left, m, right);
       }
     }
 
