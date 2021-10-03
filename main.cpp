@@ -9,7 +9,7 @@ using namespace std;
 class Sort {
   private:
     int length;
-  public:
+  public: 
     virtual void play() = 0;
 
     void init_Array(int arr[]) {
@@ -19,10 +19,10 @@ class Sort {
         cout << arr[x] << endl;
       }
     }
-    //getLength asks the user to select the number of elements for the list
+    // getLength asks the user to select the number of elements for the list
     void getLength() {
       do {
-      cout << "Enter number of elements in list (between 10 and 25000)";
+      cout << "Enter number of elements in list (between 10 and 25000)" << endl;
       cin >> length;
       cout << endl;
       } while (length < 10 || length > 25000);
@@ -31,7 +31,7 @@ class Sort {
     int ReturnLength() {
       return length;
     }
-    //this function displays the sorted array
+    // this function displays the sorted array
     void displayArray(int arr[]) {
         int n = ReturnLength();
         cout << "---SORTED ARRAY---" << endl;
@@ -40,7 +40,6 @@ class Sort {
       }
 };
 
-// https://www.softwaretestinghelp.com/bubble-sort/
 class Bubble : public Sort {
   public:
     void play() {
@@ -49,10 +48,22 @@ class Bubble : public Sort {
       int l = ReturnLength();
       int arr[l];
       init_Array(arr);
-    /*bool swapped = false;
-      for ()
-      */
-  }
+      //here is the where the bubble sort takes place
+      int i, j, temp;
+      for(i = 0; i < l; i++) {
+        for(j = i + 1; j < l; j++) {
+          if(arr[j] < arr[i]) {
+            temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+          }
+        }
+      }
+      cout << "---SORTED ARRAY---" << endl;
+        for (int i = 0; i < l; ++i){
+          cout << arr[i] << endl;
+        }
+    }
 };
 /// Notes: Compare [i] to [i+1], if i+1 > i keep in same position
 /// if i+1 < i, shift index down,move i+1 to temp, move [i] to i+1.
@@ -65,36 +76,52 @@ class Insertion : public Sort {
       int l = ReturnLength();
       int arr[l];
       init_Array(arr);
-      int hold[1] = {0};
-      int i = 0;
+      int hold[1] = {0}; //Temp storage for swaps
+      int i = 0; //index initializer
       /*main algorithm for insertion*/
-      while( arr[i+1] < arr[i] ){
+      while( i < l ){
+        if(arr[i+1] < arr[i]){
           swap(hold[0], arr[i]); //moves val to hold, and hold to index i's pos.
-          ///FIX: swap(arr[i-1].swap(hold); // swaps the hold with index i - 1's pos
-          //hold.swap(arr[i]); // swaps hold with index i's pos. Should have 0 in hold again.
-          if (i == 1){
-              break;
+          swap(arr[i+1], hold[0]); // swaps the hold with index i + 1's pos
+          swap(arr[i], hold[0]); // swaps hold with index i's pos. Should have 0 in hold again.
+          if(arr[i + 1] >= arr[i] && arr[i - 1] <= arr[i]){
+            i++; //incrementer
+          }
+          else{
+            i = 0; //If condition above is false, starts from beginning
+          }
+        }
+          else if (i == l){
+              break; //upon reaching i equals length, break loop.
+          }
+          else{
+            i++; //increment
           }
       }
+      cout << "---SORTED ARRAY---" << endl; //Post sort output.
+        for(int i = 1; i<=l; i++) {
+          cout << arr[i] << endl;
+    }
   }
 };
 
 class Merge : public Sort {
   public:
-    void merge(int arr[], int left, int middle, int right) {
-      int i, j, k, nl, nr;
-      //size of left and right sub-arrays
-      nl = middle-left+1; 
-      nr = right-middle;
-      int leftArr[nl], rightArr[nr];
+    void algorithm(int arr[], int left, int middle, int right) {
+      int i, j, k, subLeft, subRight;
+      //get the size of both sub-arrays
+      subLeft = middle - left + 1; 
+      subRight = right-middle;
+      int leftArr[subLeft], rightArr[subRight];
       //fill left and right sub-arrays
-      for(i = 0; i<nl; i++)
+      for(i = 0; i < subLeft; i++)
         leftArr[i] = arr[left+i];
-      for(j = 0; j<nr; j++)
+      for(j = 0; j < subRight; j++)
         rightArr[j] = arr[middle+1+j];
+      
       i = 0; j = 0; k = left;
-      //marge temp arrays to real array
-      while(i < nl && j<nr) {
+      //combine both sub arrays
+      while(i < subLeft && j < subRight) {
         if(leftArr[i] <= rightArr[j]) {
           arr[k] = leftArr[i];
           i++;
@@ -105,24 +132,24 @@ class Merge : public Sort {
         }
         k++;
       }
-      while(i<nl) {       //extra element in left array
+      while(i < subLeft) {      
         arr[k] = leftArr[i];
         i++; k++;
       }
-      while(j<nr) {     //extra element in right array
+      while(j < subLeft) {     
         arr[k] = rightArr[j];
         j++; k++;
       }
     }
 
     void mergeSort(int arr[], int left, int right) {
-      int m;
+      int middle;
       if(left < right) {
-        int m = left+(right-left)/2;
-        // Sort first and second arrays
-        mergeSort(arr, left, m);
-        mergeSort(arr, m+1, right);
-        merge(arr, left, m, right);
+        middle = left + (right - left) / 2;
+        
+        mergeSort(arr, left, middle);
+        mergeSort(arr, middle + 1, right);
+        algorithm(arr, left, middle, right);
       }
     }
 
@@ -139,80 +166,103 @@ class Merge : public Sort {
 
 class Quick : public Sort {
   public:
+    // A utility function to swap two elements
+    void swap(int* a, int* b) {
+      int t = *a;
+      *a = *b;
+      *b = t;
+    }
+
+    int partition (int arr[], int low, int high) {
+      int pivot = arr[high];    // pivot
+      int i = (low - 1);  // Index of smaller element
+      
+      for (int j = low; j <= high - 1; ++j) {
+        // If current element is smaller than or
+        // equal to pivot
+        if (arr[j] <= pivot) {
+          ++i;
+          swap(&arr[i], &arr[j]);
+        }
+      }
+      swap(&arr[i + 1], &arr[high]);
+      return (i + 1);
+    }
+
+    /* The main function that implements QuickSort
+    arr[] --> Array to be sorted,
+    low  --> Starting index,
+    high  --> Ending index */
+    void quickSort(int arr[], int low, int high) {
+      if (low < high) {
+        
+        int part = partition(arr, low, high);
+ 
+        // Separately sort elements before
+        // partition and after partition
+        quickSort(arr, low, part - 1);
+        quickSort(arr, part + 1, high);
+      }
+    }
     void play() {
       cout << "---Quick Play---" << endl;
       getLength();
       int l = ReturnLength();
       int arr[l];
       init_Array(arr);
-      /*int pivot;
-      int midpoint = ql.size() / 2;
-      int low = 0;
-      int high = ql.size() - 1;
-      bool done = false;
-      while(!done) {
-        while (low < midpoint) {
-          low += 1;
-        }
-        while (high > midpoint) {
-          high -= 1;
-        }
-        if (high >= low) {
-          done = true;
-        }
-      }*/
+      quickSort(arr, 0, l - 1);
+      displayArray(arr);
     }
-    /*void algorithm() {
-
-    }*/
 };
 
 class Heap : public Sort {
   public:
+    void heapify(int arr[], int n, int root) {
+      int largest = root; // root is the largest element
+      int l = 2*root + 1; // left = 2*root + 1
+      int r = 2*root + 2; // right = 2*root + 2
+  
+      // If left child is larger than root
+      if (l < n && arr[l] > arr[largest])
+        largest = l;
+  
+      // If right child is larger than largest so far
+        if (r < n && arr[r] > arr[largest])
+          largest = r;
+  
+      // If largest is not root
+      if (largest != root) {
+        //swap root and largest
+        swap(arr[root], arr[largest]);
+  
+        // Recursively heapify the sub-tree
+        heapify(arr, n, largest);
+      }
+    }
+
+    void heapSort(int arr[], int n) {
+      
+      for (int i = n / 2 - 1; i >= 0; i--)
+        heapify(arr, n, i);
+  
+      // extracting elements from heap one by one
+      for (int i = n-1; i>= 0; i--) {
+        // Move current element to the end
+        swap(arr[0], arr[i]);
+  
+        // again call max heapify on the reduced heap
+        heapify(arr, i, 0);
+      }
+    }
+
     void play() {
       cout << "---Heap Play---" << endl;
       getLength();
       int l = ReturnLength();
       int arr[l];
       init_Array(arr);
-      /*void heapify(int arr[], int n, int root) {
-          int largest = root; // root is the largest element
-          int l = 2*root + 1; // left = 2*root + 1
-          int r = 2*root + 2; // right = 2*root + 2
-  
-          // If left child is larger than root
-          if (l < n && arr[l] > arr[largest])
-            largest = l;
-  
-          // If right child is larger than largest so far
-            if (r < n && arr[r] > arr[largest])
-              largest = r;
-  
-          // If largest is not root
-          if (largest != root) {
-            //swap root and largest
-            swap(arr[root], arr[largest]);
-  
-            // Recursively heapify the sub-tree
-            heapify(arr, n, largest);
-          }
-        }
-  
-      // implementing heap sort
-      void heapSort(int arr[], int n) {
-        // build heap
-        for (int i = n / 2 - 1; i >= 0; i--)
-          heapify(arr, n, i);
-  
-        // extracting elements from heap one by one
-        for (int i=n-1; i>=0; i--) {
-          // Move current root to end
-          swap(arr[0], arr[i]);
-  
-          // again call max heapify on the reduced heap
-          heapify(arr, i, 0);
-        }
-      } */
+      heapSort(arr, l);
+      displayArray(arr);
     }
 };
 
@@ -231,17 +281,17 @@ class Counting : public Sort {
             max = arr[i];
       } //the max element from the array
 
-      int output[l+1];
-      int count[max+1];     //create count array (max+1 number of elements)
+      int output[l + 1];
+      int count[max + 1];
       
       for(int i = 0; i<=max; i++)
-        count[i] = 0;     //initialize count array to all zero
+        count[i] = 0;
   
       for(int i = 1; i <=l; i++) 
         count[arr[i]] += 1;     //increase number count in count array.
       cout << endl;
       for(int i = 1; i<=max; i++)
-        count[i] += count[i-1];     //find cumulative frequency
+        count[i] += count[i-1];     
       cout << endl;
       for(int i = l; i>=0; i--) {
         output[count[arr[i]]] = arr[i];
@@ -249,7 +299,7 @@ class Counting : public Sort {
       }
       cout << "---SORTED ARRAY---" << endl;
       for(int i = 1; i<=l; i++) {
-        arr[i] = output[i]; //store output array to main array
+        arr[i] = output[i]; 
         cout << arr[i] << endl;
       }
     }
@@ -263,6 +313,43 @@ class Radix : public Sort {
       int l = ReturnLength();
       int arr[l];
       init_Array(arr);
+
+      int n = sizeof(arr) / sizeof(arr[0]);
+      int output[n]; 
+
+      int max = arr[1];
+
+      for(int i = 2; i<=l; i++) {
+          if(arr[i] > max)
+            max = arr[i];
+      } 
+
+      for (int exp = 1; max / exp > 0; exp *= 10){
+        
+        int i, count[10] = { 0 };
+ 
+        for (i = 0; i < n; i++)
+            count[(arr[i] / exp) % 10]++;
+    
+        for (i = 1; i < 10; i++)
+            count[i] += count[i - 1];
+    
+        for (i = n - 1; i >= 0; i--) {
+            output[count[(arr[i] / exp) % 10] - 1] = arr[i];
+            count[(arr[i] / exp) % 10]--;
+        }
+    
+        for (i = 0; i < n; i++){
+            arr[i] = output[i];
+            
+        }
+        
+      
+            
+      }
+      displayArray(output);
+      
+
     }
 };
 
@@ -308,10 +395,10 @@ class Students : public Sort {
         if (head == NULL) {
           head = temp;
           tail = temp;
-          tail->Next = NULL;
+          temp = NULL;
         }
         else {
-          tail -> Next = NULL;
+          tail->Next = temp;
           tail = temp;
         }
         x += 1;
@@ -348,7 +435,6 @@ int main() {
       bptr = &h;
     }
     else if (decision == 6) {
-      cout << "6";
       Counting c;
       bptr = &c;
     }
@@ -362,5 +448,5 @@ int main() {
     }
     bptr->play();
     auto t2 = Clock::now();
-    std::cout << "Delta t2-t1: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " nanoseconds" << std::endl;
+    std::cout << "Operation Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << " milliseconds" << std::endl; 
 }
